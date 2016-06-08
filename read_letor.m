@@ -29,5 +29,6 @@ function [X, Y] = read_letor(filename)
         X(i, tmp(1 : 2 : end)) = tmp(2 : 2 : end);
     end
     
+    
     X = X(1 : i, :);
     fclose(f);

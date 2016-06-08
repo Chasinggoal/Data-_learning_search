@@ -1,4 +1,4 @@
-function output = listMLE(dataset)
+function output = listMLE_Plotting_Likelihood(dataset)
 NDCGTR = zeros(5, 10); % document the NDCG for training data set(a method to measure the ranking quality; known as normalised discounted cumulative gain)
 NDCGVA = zeros(5, 10); % document the NDCG for validation data set
 NDCGTE = zeros(5, 10); % document the NDCG for testing data set
@@ -6,6 +6,10 @@ outfile = 'out.txt';   % the outfile is used to document the performance by usin
 T = 500;               % number of iterations (Note: 500 is just a random number; we can improve by finding an optimal number)
 times = 1;             % frequency to document the value of w (beta vector)
 rate = 0.01;           % length of the step (Note: 0.01 is a random small step; in the future we need to code something to ensure convergence)
+addpath('/Users/David/Documents/MATLAB/DataPlus'); % add the function preparing to graph
+import Permutation_single_query;
+
+likelihood_vector = zeros(T,1); %documenting the likelihooda
 
 % divid the data into five folders, and go through each of them
 for fold = 1 : 1
@@ -44,7 +48,7 @@ for fold = 1 : 1
                 result(3) = result(2) - exp(product(2)) * tmpX(2, inx);
 
                 tmpx = [tmpX(1, inx), tmpX(2, inx), tmpX(3, inx)];
-                delta(inx) = delta(inx) + sum(result / totalexp - tmpx);
+                delta(inx) = double(delta(inx)) + double(sum(result / totalexp - tmpx));
             end
             cnt = cnt + length(Y{i});
         end
@@ -54,13 +58,17 @@ for fold = 1 : 1
             param(:, in) = w;
             in = in + 1;
         end
-        
+        likelihood = double(Permutation_single_query(w,X)); % documenting the likelihood value
+        display(likelihood);
+        display(loop);
+        likelihood_vector(loop)=likelihood;
     end
+    plot(1:T,likelihood_vector);
 
     % calculate NDCG for validation data in order to select w among all
     [Xt,Yt] = read_letor([dname '/vali.txt']);
     nd = zeros(T / times, 10);  % document NDCG for each data set
-    % ????????????????
+    % calculate the NDCG
     for i = 1 : T / times
         NDCG = zeros(1, 10);
         cnt = 0;
@@ -166,11 +174,11 @@ NDCGALL = {NDCGTE, NDCGVA, NDCGTR};
 f = fopen(outfile, 'w');
 for i = 1 : 3
     if (i == 1)
-        fname = 'test';
+        fname = 'testing';
     elseif (i == 2)
-        fname = 'vali';
+        fname = 'validation';
     else
-        fname = 'train';
+        fname = 'training';
     end
     fprintf(f, 'Performance on %s set\r\n', fname);
     fprintf(f, 'Folds	NDCG@1	NDCG@2	NDCG@3	NDCG@4	NDCG@5	NDCG@6	NDCG@7	NDCG@8	NDCG@9	NDCG@10\r\n');

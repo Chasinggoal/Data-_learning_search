@@ -9,11 +9,11 @@ i = 1;
 s = size(g);
 y = 1; 
 while i<=s(1)
-    y = y*e^(g(i,1));
+    y = double(y)*double(e^(g(i,1)));
     denom = 0;
     indic = 1;
     while indic <= s(1)-i+1
-        denom = denom + e^(g(s(1)-indic+1,1));
+        denom = denom + double(e^(g(s(1)-indic+1,1)));
         indic = indic+1;
     end
     y = y/denom;
