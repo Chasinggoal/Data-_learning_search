@@ -3,12 +3,12 @@ NDCGTR = zeros(5, 10); % document the NDCG for training data set(a method to mea
 NDCGVA = zeros(5, 10); % document the NDCG for validation data set
 NDCGTE = zeros(5, 10); % document the NDCG for testing data set
 outfile = 'out.txt';   % the outfile is used to document the performance by using NDCG
-T = 500;               % number of iterations (Note: 500 is just a random number; we can improve by finding an optimal number)
+T = 5000;               % number of iterations (Note: 500 is just a random number; we can improve by finding an optimal number)
 times = 1;             % frequency to document the value of w (beta vector)
-rate = 0.01;           % length of the step (Note: 0.01 is a random small step; in the future we need to code something to ensure convergence)
+rate = 0.001;           % length of the step (Note: 0.01 is a random small step; in the future we need to code something to ensure convergence)
 
 % divid the data into five folders, and go through each of them
-for fold = 1 : 1
+for fold = 2 : 2
     dname = [dataset '/Fold' num2str(fold) ];    % name of training data
     [X, Y] = read_letor([dname '/train.txt']);      % read training data
     w = zeros(length(X(1, :)), 1);                  % initialize value for w as 0 vector

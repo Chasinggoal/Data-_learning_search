@@ -1,11 +1,11 @@
-function output = listMLE_Plotting_Likelihood(dataset)
+function output = listMLE_Plotting_Likelihood_nonNDCGbased(dataset)
 NDCGTR = zeros(5, 10); % document the NDCG for training data set(a method to measure the ranking quality; known as normalised discounted cumulative gain)
 NDCGVA = zeros(5, 10); % document the NDCG for validation data set
 NDCGTE = zeros(5, 10); % document the NDCG for testing data set
 outfile = 'out.txt';   % the outfile is used to document the performance by using NDCG
-T = 500;               % number of iterations (Note: 500 is just a random number; we can improve by finding an optimal number)
+T = 500000;               % number of iterations (Note: 500 is just a random number; we can improve by finding an optimal number)
 times = 1;             % frequency to document the value of w (beta vector)
-rate = 0.01;           % length of the step (Note: 0.01 is a random small step; in the future we need to code something to ensure convergence)
+rate = 0.001;           % length of the step (Note: 0.01 is a random small step; in the future we need to code something to ensure convergence)
 addpath('/Users/David/Documents/MATLAB/DataPlus'); % add the function preparing to graph
 import Permutation_single_query;
 import Permutation_multiple_query;
@@ -65,142 +65,24 @@ for fold = 1 : 1
         display(loop);
         likelihood_vector(loop)=likelihood;
     end
+    [~,tin]= max(likelihood_vector);
+    w = param(:, tin);
+    display(tin);
+    output=w;
     plot(1:T,likelihood_vector);
 
-    % calculate NDCG for validation data in order to select w among all
-    [Xt,Yt] = read_letor([dname '/vali.txt']);
-    nd = zeros(T / times, 10);  % document NDCG for each data set
-    % calculate the NDCG
-    for i = 1 : T / times
-        NDCG = zeros(1, 10);
-        cnt = 0;
-        % go through each query (based on qid)
-        for j = 1 : length(Yt)
-            tmpX = Xt(cnt + 1 : cnt + length(Yt{j}), :);    % access the corresponding x
-            YY = tmpX * param(:, i);                        % calculate the score for each X
-
-            % the following process is targetted as a specific kind of data
-            % when the data size is less than 10 for one specific query
-            if (length(Yt{j}) < 10)
-                size = length(Yt{j});
-            else
-                size = 10;
-            end
-            
-            [Ys, ~] = sort(Yt{j}, 'descend');   % sort in descending order for Y
-            [~, index] = sort(YY, 'descend');   % sort according to the value calculated from current model
-            
-            YYt = zeros(1, size);
-            % access the Y value and compare
-            for k = 1 : size
-                YYt(k) = Yt{j}(index(k));
-            end
-
-            NDCG = NDCG + calNDCG(Ys, YYt, size);   % accumulate the value of NDCG
-            cnt = cnt + length(Yt{j});              % indexing them
-        end
-
-        NDCG = NDCG ./ length(Yt);  % calculate the average value (note that we can use other measurements that take into considerations, eg: standard deviation)
-        nd(i, :) = NDCG;            % get the average value
-    end
-
-    % find the one with highest NDCG value
-    avg = sum(nd, 2);
-    [~, tin] = max(avg);
-    display(tin);
-    w = param(:, tin);
-    output=w;
-    NDCGVA(fold, :) = nd(tin, :);   % select the best w
     
-    % apply the w value on testing data to get NDCG as meaurements on how
-    % well the model performs
-    [Xt,Yt] = read_letor([dname '/test.txt']);
-    %name = [dname 'sorce.txt'];
-    %out = Xt * w;
-    %save(name, 'out', '-ascii');
-    %system(['perl Eval-Score-3.0.pl ' dname '/test.txt ' name ' ' dname '/ndcg.txt 0']);
-    cnt = 0;
-    NDCG = zeros(1, 10);
-    for i = 1 : length(Yt)
-        tmpX = Xt(cnt + 1 : cnt + length(Yt{i}), :);
-        YY = tmpX * w;
-
-        [Ys, ~] = sort(Yt{i}, 'descend');
-        [~, index] = sort(YY, 'descend');
-        if (length(Yt{i}) < 10)
-            size = length(Yt{i});
-        else
-            size = 10;
-        end
-        YYt = zeros(1, size);
-        for j = 1 : size
-            YYt(j) = Yt{i}(index(j));
-        end
-
-        NDCG = NDCG + calNDCG(Ys, YYt, size);
-        cnt = cnt + length(Yt{i});
-    end
-
-    NDCG = NDCG ./ length(Yt);
-    NDCGTE(fold, :) = NDCG;
     
-    % go back and calculate the NDCG on training data
-    cnt = 0;
-    NDCG = zeros(1, 10);
-    for i = 1 : length(Y)
-        tmpX = X(cnt + 1 : cnt + length(Y{i}), :);
-        YY = tmpX * w;
+    
+    
 
-        [Ys, ~] = sort(Y{i}, 'descend');
-        [~, index] = sort(YY, 'descend');
-        if (length(Y{i}) < 10)
-            size = length(Y{i});
-        else
-            size = 10;
-        end
-        YYt = zeros(1, size);
-        for j = 1 : size
-            YYt(j) = Y{i}(index(j));
-        end
-
-        NDCG = NDCG + calNDCG(Ys, YYt, size);
-        cnt = cnt + length(Y{i});
-    end
-
-    NDCG = NDCG ./ length(Y);
-    NDCGTR(fold, :) = NDCG;
+    
+    
 end
 
 % outputing the NDCG value into the out.txt file to understand how well the
 % model works
-NDCGALL = {NDCGTE, NDCGVA, NDCGTR}; 
-f = fopen(outfile, 'w');
-for i = 1 : 3
-    if (i == 1)
-        fname = 'testing';
-    elseif (i == 2)
-        fname = 'validation';
-    else
-        fname = 'training';
-    end
-    fprintf(f, 'Performance on %s set\r\n', fname);
-    fprintf(f, 'Folds	NDCG@1	NDCG@2	NDCG@3	NDCG@4	NDCG@5	NDCG@6	NDCG@7	NDCG@8	NDCG@9	NDCG@10\r\n');
-    for j = 1 : 5
-        fprintf(f, 'Fold%d   ', j);
-        for k = 1 : 10
-            fprintf(f, '%.4f  ', NDCGALL{i}(j, k));
-        end
-        fprintf(f, '\r\n');
-    end
-    fprintf(f, 'aver    ');
-    avg = sum(NDCGALL{i}, 1);
-    for j = 1 : 10
-        fprintf(f, '%.4f  ', avg(j) / 5);
-    end
-    fprintf(f, '\r\n');
-    fprintf(f, '\r\n');
-end
-fclose(f);
+
 
 % function below is used to read the SVMLight formatting of feature data
 % and ranks

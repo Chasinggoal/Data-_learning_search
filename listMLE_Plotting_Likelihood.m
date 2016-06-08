@@ -3,13 +3,15 @@ NDCGTR = zeros(5, 10); % document the NDCG for training data set(a method to mea
 NDCGVA = zeros(5, 10); % document the NDCG for validation data set
 NDCGTE = zeros(5, 10); % document the NDCG for testing data set
 outfile = 'out.txt';   % the outfile is used to document the performance by using NDCG
-T = 500;               % number of iterations (Note: 500 is just a random number; we can improve by finding an optimal number)
+T = 50000;               % number of iterations (Note: 500 is just a random number; we can improve by finding an optimal number)
 times = 1;             % frequency to document the value of w (beta vector)
-rate = 0.01;           % length of the step (Note: 0.01 is a random small step; in the future we need to code something to ensure convergence)
+rate = 0.0000001;           % length of the step (Note: 0.01 is a random small step; in the future we need to code something to ensure convergence)
 addpath('/Users/David/Documents/MATLAB/DataPlus'); % add the function preparing to graph
 import Permutation_single_query;
+import Permutation_multiple_query;
 
 likelihood_vector = zeros(T,1); %documenting the likelihooda
+
 
 % divid the data into five folders, and go through each of them
 for fold = 1 : 1
@@ -18,19 +20,19 @@ for fold = 1 : 1
     w = zeros(length(X(1, :)), 1);                  % initialize value for w as 0 vector
     param = zeros(length(w), T / times);            % every T/times store w
     in = 1;                                         % index of current parameter
-    
+    X_divid = cell(length(Y));                      % create a cell array preparing to cal the likelihood
     % T iterations
     for loop = 1 : T
         cnt = 0;                                    % index corresponding to X
         delta = zeros(1, length(w));                % initialize the increasement as delta as 0 vector
         for i = 1 : length(Y)
-            [~, index] = sort(Y{i}, 'descend');     % sort Y in descending order
+            [~, index] = sort(Y{i}, 'ascend');     % sort Y in ascending order
             tmpX = zeros(length(Y{i}), length(w));  % initialize temporary value for X as 0 matrix for gradient descent
 
             for j = 1 : length(Y{i})
                 tmpX(j, :) = X(cnt + index(j), :);  % document the X that corresponds to each Y
             end
-
+            X_divid{i} = tmpX;                      % documenting each X for each part of X_divid
             product = tmpX * w;                     % 
             totalexp = zeros(1, 3);                 % sum of all exponentials
             tmpexp = exp(product);
@@ -58,9 +60,9 @@ for fold = 1 : 1
             param(:, in) = w;
             in = in + 1;
         end
-        likelihood = double(Permutation_single_query(w,X)); % documenting the likelihood value
-        display(likelihood);
-        display(loop);
+        likelihood = double(Permutation_multiple_query(w,X_divid)); % documenting the likelihood value
+        %display(likelihood);
+        %display(loop);
         likelihood_vector(loop)=likelihood;
     end
     plot(1:T,likelihood_vector);
@@ -85,8 +87,8 @@ for fold = 1 : 1
                 size = 10;
             end
             
-            [Ys, ~] = sort(Yt{j}, 'descend');   % sort in descending order for Y
-            [~, index] = sort(YY, 'descend');   % sort according to the value calculated from current model
+            [Ys, ~] = sort(Yt{j}, 'ascend');   % sort in ascending order for Y
+            [~, index] = sort(YY, 'ascend');   % sort according to the value calculated from current model
             
             YYt = zeros(1, size);
             % access the Y value and compare
@@ -105,6 +107,7 @@ for fold = 1 : 1
     % find the one with highest NDCG value
     avg = sum(nd, 2);
     [~, tin] = max(avg);
+    display(tin);
     w = param(:, tin);
     output=w;
     NDCGVA(fold, :) = nd(tin, :);   % select the best w
@@ -122,8 +125,8 @@ for fold = 1 : 1
         tmpX = Xt(cnt + 1 : cnt + length(Yt{i}), :);
         YY = tmpX * w;
 
-        [Ys, ~] = sort(Yt{i}, 'descend');
-        [~, index] = sort(YY, 'descend');
+        [Ys, ~] = sort(Yt{i}, 'ascend');
+        [~, index] = sort(YY, 'ascend');
         if (length(Yt{i}) < 10)
             size = length(Yt{i});
         else
@@ -148,8 +151,8 @@ for fold = 1 : 1
         tmpX = X(cnt + 1 : cnt + length(Y{i}), :);
         YY = tmpX * w;
 
-        [Ys, ~] = sort(Y{i}, 'descend');
-        [~, index] = sort(YY, 'descend');
+        [Ys, ~] = sort(Y{i}, 'ascend');
+        [~, index] = sort(YY, 'ascend');
         if (length(Y{i}) < 10)
             size = length(Y{i});
         else

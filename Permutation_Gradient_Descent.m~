@@ -13,7 +13,6 @@ w = zeros(length(X(1, :)), 1);
 param = zeros(length(w),T);
 X_divid = cell(length(Y));                      % create a cell array preparing to cal the likelihood
 cnt=0;
-likelihood_vector = zeros(T,1); %documenting the likelihooda
 for i = 1 : length(Y)
     [~, index] = sort(Y{i}, 'descend');     % sort Y in descending order
     tmpX = zeros(length(Y{i}), length(w));  % initialize temporary value for X as 0 matrix for gradient descent
@@ -26,9 +25,8 @@ for i = 1 : length(Y)
 end
 
 beta = sym('beta_%d',[1 length(w)]);
-beta = beta.';
 grad = cell(size(w));
-permutation = sym(Permutation_multiple_query(beta,X_divid));
+permutation = sym(Permutation_multiple_query(beta,X));
 for i = 1 : length(w)
     grad{i} = diff(permutation, beta(i));
 end
@@ -37,20 +35,14 @@ for loop = 1:T
     tempW = w;
     for i = 1: length(w)
         differentiation = sym(grad{i});
-        display(differentiation);
-        tempW(i) = w(i) + differentiation(w)*step;
+        tempW(i) = w(i) + grad{differentiation(w)};
     end
-    w = tempW;
-    param(:,loop) = w;
-    likelihood = double(Permutation_multiple_query(w,X_divid)); % documenting the likelihood value
-    display(likelihood);
-    display(loop);
-    likelihood_vector(loop)=likelihood;
+    
+
 
 
 end
-output = param(:,T);
-plot(1:T,likelihood_vector);
+
 end
 
 function [X, Y] = read_letor(filename)  % X is a feature matrix; Y is a ranking cell array

@@ -11,7 +11,7 @@ p = 1;
 i = 1;
 while i <= s
     current = x{i};
-    p = p*Permutation_single_query(b, current);
+    p = p*(Permutation_single_query(b, current));
     i =  i+1;
 end
 
