@@ -13,3 +13,7 @@ simulated_data7 = 1 query, 100 objects with 2 features
 simulated_data8 = 1 query, 200 objects with 2 features
   Beta_true = 2, 8
   Output8.txt formatted data of simluated_data8 to use as input for model
+  
+simulated_data8 = 2 query, 100 objects each with 2 features
+  Beta_true = 2, 8
+  Output9.txt formatted data of simluated_data9 to use as input for model
