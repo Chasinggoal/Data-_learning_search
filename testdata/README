@@ -1,11 +1,15 @@
-simulated_data4 = 30 objects with 15 features
+simulated_data4 = 1 query, 30 objects with 15 features
   Beta_true = 1, 2, 3, 4, 5, 10, 0 , 0, 0, -1, -2, -3, -4, -5, -10
   Output4.txt formatted data of simluated_data6 to use as input for model
   
-simulated_data6 = 100 objects with 15 features
+simulated_data6 = 1 query, 100 objects with 15 features
   Beta_true = 1, 2, 3, 4, 5, 10, 0 , 0, 0, -1, -2, -3, -4, -5, -10
   Output6.txt formatted data of simluated_data6 to use as input for model
 
-simulated_data7 = 100 objects with 2 features
+simulated_data7 = 1 query, 100 objects with 2 features
   Beta_true = 0, 6
   Output7.txt formatted data of simluated_data7 to use as input for model
+  
+simulated_data8 = 1 query, 200 objects with 2 features
+  Beta_true = 2, 8
+  Output8.txt formatted data of simluated_data8 to use as input for model
