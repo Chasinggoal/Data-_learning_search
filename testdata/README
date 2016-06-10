@@ -1,0 +1,11 @@
+simulated_data4 = 30 objects with 15 features
+  Beta_true = 1, 2, 3, 4, 5, 10, 0 , 0, 0, -1, -2, -3, -4, -5, -10
+  Output4.txt formatted data of simluated_data6 to use as input for model
+  
+simulated_data6 = 100 objects with 15 features
+  Beta_true = 1, 2, 3, 4, 5, 10, 0 , 0, 0, -1, -2, -3, -4, -5, -10
+  Output6.txt formatted data of simluated_data6 to use as input for model
+
+simulated_data7 = 100 objects with 2 features
+  Beta_true = 0, 6
+  Output7.txt formatted data of simluated_data7 to use as input for model
