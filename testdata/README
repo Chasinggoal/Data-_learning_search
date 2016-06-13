@@ -18,6 +18,10 @@ simulated_data8 = 2 query, 100 objects each with 2 features
   Beta_true = 2, 8
   Output9.txt formatted data of simluated_data9 to use as input for model
   
-simulated_data810 = 1 query, 2000 objects each with 2 features
+simulated_data10 = 1 query, 2000 objects each with 2 features
   Beta_true = -3, 6
   Output10.txt formatted data of simluated_data10 to use as input for model
+  
+simulated_data11 = 1 query, 2000 objects each with 15 features
+  Beta_true = 1, 2, 3, 4, 5, 10, 0 , 0, 0, -1, -2, -3, -4, -5, -10
+  Output11.txt formatted data of simluated_data11 to use as input for model
