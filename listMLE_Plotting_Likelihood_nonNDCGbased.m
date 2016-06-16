@@ -3,18 +3,22 @@ NDCGTR = zeros(5, 10); % document the NDCG for training data set(a method to mea
 NDCGVA = zeros(5, 10); % document the NDCG for validation data set
 NDCGTE = zeros(5, 10); % document the NDCG for testing data set
 outfile = 'out.txt';   % the outfile is used to document the performance by using NDCG
-T = 500000;               % number of iterations (Note: 500 is just a random number; we can improve by finding an optimal number)
+T = 10000;               % number of iterations (Note: 500 is just a random number; we can improve by finding an optimal number)
 times = 1;             % frequency to document the value of w (beta vector)
 rate = 0.001;           % length of the step (Note: 0.01 is a random small step; in the future we need to code something to ensure convergence)
 addpath('/Users/David/Documents/MATLAB/DataPlus'); % add the function preparing to graph
 import Permutation_single_query;
 import Permutation_multiple_query;
 
-likelihood_vector = zeros(T,1); %documenting the likelihooda
+alpha = 0.8;        % the backtracking line search constant
 
+likelihood_vector = zeros(T,1); %documenting the likelihooda
+likelihood_log_vector = zeros(T,1);
+
+digits(5000);
 
 % divid the data into five folders, and go through each of them
-for fold = 1 : 1
+for fold = 2 : 2
     dname = [dataset '/Fold' num2str(fold) ];    % name of training data
     [X, Y] = read_letor([dname '/train.txt']);      % read training data
     w = zeros(length(X(1, :)), 1);                  % initialize value for w as 0 vector
@@ -22,11 +26,13 @@ for fold = 1 : 1
     in = 1;                                         % index of current parameter
     X_divid = cell(length(Y));                      % create a cell array preparing to cal the likelihood
     % T iterations
-    for loop = 1 : T
+    loop = 1;
+    adj = 0;                                        % record the number of adjustments recorded by changing step size
+    while loop < T
         cnt = 0;                                    % index corresponding to X
         delta = zeros(1, length(w));                % initialize the increasement as delta as 0 vector
         for i = 1 : length(Y)
-            [~, index] = sort(Y{i}, 'descend');     % sort Y in descending order
+            [~, index] = sort(Y{i}, 'ascend');      % sort Y in ascending order
             tmpX = zeros(length(Y{i}), length(w));  % initialize temporary value for X as 0 matrix for gradient descent
 
             for j = 1 : length(Y{i})
@@ -54,24 +60,79 @@ for fold = 1 : 1
             end
             cnt = cnt + length(Y{i});
         end
-
+        wrec = w;           % record w in case we need to go back
         w = w - delta' .* rate;     % update value for w
+        display(w);     % check the value of w
         if (mod(loop, times) == 0)  % document w when needed
             param(:, in) = w;
             in = in + 1;
         end
-        likelihood = double(Permutation_multiple_query(w,X_divid)); % documenting the likelihood value
+        likelihood = Permutation_multiple_query(w,X_divid); % documenting the likelihood value
+        likelihood_log = log(likelihood);
+        display(likelihood_log);
         display(likelihood);
         display(loop);
         likelihood_vector(loop)=likelihood;
+        likelihood_log_vector(loop) = likelihood_log;
+        if loop > 20
+            if likelihood_log_vector(loop)-likelihood_log_vector(loop-1) < 0 && adj<2000
+                rate = rate * alpha;
+                w = wrec;
+                adj = adj+1;
+                continue;
+            elseif adj >= 20000
+                display('too much adjustments');
+                break;
+            end
+        end
+        if loop > 1000
+            if abs((likelihood_log_vector(loop)-likelihood_log_vector(loop-1000))/likelihood_log_vector(loop))<0.0000000000000000001
+                display('break because of change is approximate epsilon');
+                break;
+            end
+        end
+        loop = loop + 1;
+        adj = 0;
     end
-    [~,tin]= max(likelihood_vector);
-    w = param(:, tin);
-    display(tin);
     output=w;
-    plot(1:T,likelihood_vector);
-
+    plot(1:loop-1,likelihood_log_vector(1:loop-1));
     
+    
+    % calculate the NDCG values
+    Fold = 2;
+    dname = [dataset '/Fold' num2str(Fold) ];
+    [Xt, Yt] = read_letor([dname '/train.txt']);
+    NDCG = zeros(1, 10);
+    cnt = 0;
+        % go through each query (based on qid)
+    for j = 1 : length(Yt)
+        tmpX = Xt(cnt + 1 : cnt + length(Yt{j}), :);    % access the corresponding x
+        YY = tmpX * param(:, i);                        % calculate the score for each X
+
+            % the following process is targetted as a specific kind of data
+            % when the data size is less than 10 for one specific query
+        if (length(Yt{j}) < 10)
+            size = length(Yt{j});
+        else
+            size = 10;
+        end
+            
+        [Ys, ~] = sort(Yt{j}, 'ascend');   % sort in descending order for Y
+        [~, index] = sort(YY, 'ascend');   % sort according to the value calculated from current model
+    
+        YYt = zeros(1, size);
+        % access the Y value and compare
+        for k = 1 : size
+            YYt(k) = Yt{j}(index(k));
+        end
+
+        NDCG = NDCG + calNDCG(Ys, YYt, size);   % accumulate the value of NDCG
+        cnt = cnt + length(Yt{j});              % indexing them
+    end
+
+    NDCG = NDCG ./ length(Yt);  % calculate the average value (note that we can use other measurements that take into considerations, eg: standard deviation)
+    display('NDCG VALUE')
+    display(NDCG);
     
     
     

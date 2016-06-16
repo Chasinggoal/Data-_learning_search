@@ -3,6 +3,8 @@ function y = Permutation_single_query( b,x )
 %   Detailed explanation goes here
 % x is a matrix of features with ordered rank, b is the weight set col
 % vector
+
+digits(10000);
 g = x*b;
 e = exp(1);
 i = 1;

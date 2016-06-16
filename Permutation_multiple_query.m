@@ -3,6 +3,8 @@ function p = Permutation_multiple_query( b,x )
 %   Detailed explanation goes here
 % b is a col vector of weights; x is a cell col vector consisted of outputs
 % of multiple queries
+
+digits(10000);
 addpath('/Users/David/Documents/MATLAB/DataPlus');
 import Permutation_single_query;
 si = size(x);
