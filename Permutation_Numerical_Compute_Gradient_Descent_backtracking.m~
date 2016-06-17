@@ -15,7 +15,7 @@ import Permutation_Single_Gradient_Calc;
 import Permutation_Single_Compute_Gradient_Calc
 
 T=10000;
-step = 0.1; %initialize the step size
+step = 1; %initialize the step size
 alpha = 0.8; % backtracking constant
 
 
@@ -70,17 +70,17 @@ while loop <= T
             w = wrec;
             adj = adj+1;
             continue;
-        elseif adj >= 2000
+        elseif adj >= 20000
             display('too much adjustments');
             break;
         end
     end
-    if loop > 1
-        if abs(likelihood_log_vector(loop)-likelihood_log_vector(loop-1))<0.0000000000001
-            display('too small adjustment');
-            break;
-        end
-    end
+     if loop > 1
+         if abs((likelihood_log_vector(loop)-likelihood_log_vector(loop-1))/likelihood_log_vector(loop))<0.0000000000001
+             display('too small adjustment');
+%             break;
+%         end
+%     end
     loop = loop + 1;
     adj = 0;
 end
@@ -124,5 +124,3 @@ function [X, Y] = read_letor(filename)  % X is a feature matrix; Y is a ranking 
     X = X(1 : i, :);
     fclose(f);
 end
-
-%Permutation_Numerical_Compute_Gradient_Descent_backtracking('/Users/David/Documents/Undergraduate/Data+_Search_Algorithms/Pseudo_tester_data_listML/Fold11/train.txt');
