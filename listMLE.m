@@ -222,6 +222,7 @@ function [X, Y] = read_letor(filename)  % X is a feature matrix; Y is a ranking 
         end
 
         tmp = sscanf(l, '%d:%f'); 
+        display(tmp);
         X(i, tmp(1 : 2 : end)) = tmp(2 : 2 : end);
     end
     

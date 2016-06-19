@@ -1,1 +1,1 @@
-Permutation_Numerical_Compute_Gradient_Descent_backtracking('/Users/David/Documents/Undergraduate/Data+_Search_Algorithms/Pseudo_tester_data_listML/Fold11/train.txt');
+Permutation_Numerical_Matrix_Gradient_Descent_backtracking('/Users/David/Documents/Undergraduate/Data+_Search_Algorithms/Pseudo_tester_data_listML/Fold11/train.txt');

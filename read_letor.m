@@ -26,6 +26,9 @@ function [X, Y] = read_letor(filename)
         end
 
         tmp = sscanf(l, '%d:%f'); 
+        display(tmp);
+        display(tmp(1 : 2 : end));
+        display(tmp(2 : 2 : end));
         X(i, tmp(1 : 2 : end)) = tmp(2 : 2 : end);
     end
     
