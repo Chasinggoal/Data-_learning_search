@@ -24,7 +24,6 @@ w = zeros(length(X(1, :)), 1);
 param = zeros(length(w),T);
 X_divid = cell(length(Y));                      % create a cell array preparing to cal the likelihood
 cnt=0;
-likelihood_vector = zeros(T,1); %documenting the likelihooda
 likelihood_log_vector = zeros(T,1); % documenting the log likelihood for graph
 for i = 1 : length(Y)
     [~, index] = sort(Y{i}, 'ascend');     % sort Y in ascending order
@@ -89,33 +88,32 @@ while loop <= T
     param(:,loop) = w;
     display(w);
     display(loop);
-%     likelihood = Permutation_multiple_query(w,X_divid); % documenting the likelihood value
-%     display(log(likelihood));
-%     likelihood_vector(loop)=likelihood;
-%     likelihood_log_vector(loop) = log(likelihood);
-%     if loop > 1
-%         if likelihood_log_vector(loop)-likelihood_log_vector(loop-1) < 0 && adj<2000
-%             step = step * alpha;
-%             w = wrec;
-%             adj = adj+1;
-%             continue;
-%         elseif adj >= 2000
-%             display('too much adjustments');
-%             break;
-%         end
-%     end
-%     if loop > 1
-%         if abs(likelihood_log_vector(loop)-likelihood_log_vector(loop-1))<0.0000000000001
-%             display('too small adjustment');
-%             break;
-%         end
-%     end
+    likelihood = Log_Permutation_multiple_query(w,X_divid); % documenting the likelihood value
+    display(likelihood);
+    likelihood_log_vector(loop) = likelihood;
+    if loop > 1
+        if likelihood_log_vector(loop)-likelihood_log_vector(loop-1) < 0 && adj<2000
+            step = step * alpha;
+            w = wrec;
+            adj = adj+1;
+            continue;
+        elseif adj >= 2000
+            display('too much adjustments');
+            break;
+        end
+    end
+    if loop > 1
+        if abs(likelihood_log_vector(loop)-likelihood_log_vector(loop-1))<0.5
+            display('too small adjustment');
+            break;
+        end
+    end
     loop = loop + 1;
     adj = 0;
 end
 output = param(:,loop-1);
 display(step);
-% plot(1:(loop-1),likelihood_log_vector(1:(loop-1)));
+plot(1:(loop-1),likelihood_log_vector(1:(loop-1)));
 end
 
 function [X, Y] = read_letor(filename)  % X is a feature matrix; Y is a ranking cell array
