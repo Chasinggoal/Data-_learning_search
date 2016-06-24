@@ -1,5 +1,7 @@
 import csv
 
+##**** Given csv file of feature data, convert to txt file with correct format to run in model 
+
 csvf = input('Enter a csv file to parse: ')
 with open(csvf, 'rb') as csvfile:
     f = open("Output.txt", "w")
