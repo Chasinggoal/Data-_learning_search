@@ -1,6 +1,9 @@
 import csv
 import random
 
+##****** creates a csv file of test data given the number of queries, objects per query, and features per object
+
+
 def header(featureNum):
     head = ['Object', 'qid']
     for i in range(1, featureNum + 1):
